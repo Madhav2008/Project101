@@ -1,19 +1,32 @@
+import os
 import dropbox
+from dropbox.files import WriteMode
 
-class UploadData:
-    def __init__(self, accesstoken):
-        self.accesstoken = accesstoken
-    def UploadFiles(self, source, destination):
-        dbx = dropbox.Dropbox(self.accesstoken)
-        file = open(source, "rb")
-        dbx.files_upload(file.read(), destination)
+class TransferData:
+    def __init__(self, access_token):
+        self.access_token =  access_token
+
+    def upload_file(self, filefrom, fileto):
+        dbx = dropbox.Dropbox(self.access_token)
+
+        for root, dirs, files in os.walk(filefrom):
+
+            for filename in files:
+                localpath = os.path.join(root, filename)
+
+                relative_path = os.path.relpath(localpath, filefrom)
+                dropbox_path = os.path.join(fileto, relative_path)
+                with open(localpath, 'rb') as f:
+                    dbx.files_upload(f.read(), dropbox_path, mode=WriteMode('overwrite'))
 
 def main():
-    accesstoken = "8SseBmFks7UAAAAAAAAAAcLQrY0RRiErB5Uh9k4x0AD4RFrmYX6KMhNuP4XCd4oD"
-    transferData = UploadData(accesstoken)
-    source = "C:/Users/Raghav/Desktop/Madhav/New folder (9)/madhav/Python1/py/File1.py"
-    destination = "/Project101/Project101.py"
-    transferData.UploadFiles(source, destination)
+    access_token = '8SseBmFks7UAAAAAAAAAAcLQrY0RRiErB5Uh9k4x0AD4RFrmYX6KMhNuP4XCd4oD'
+    transferData = TransferData(access_token)
+
+    filefrom = str(input("Enter The Folder Path :- "))
+    fileto = input("Enter The Path To Upload To Dropbox :- ")
+
+    transferData.upload_file(filefrom,fileto)
     print("File Has Been Moved")
-    
+
 main()
